@@ -1,0 +1,192 @@
+#! /bin/bash
+
+function Menu(){
+	opcion=`zenity --list --text="Elije una opción:" --title="Menu" --column="Opción" --column="Operación" "1" "Decimal a binario" "2" "Binario a decimal" "3" "Octal a decimal" "4" "Hexadecimal a decimal" "5" "Hexadecimal a binario" "6" "Salir"`
+	return $opcion
+}
+
+function DecBin(){
+	numDec=$(zenity --entry --title="Decimal a binario" --text="Escribe un número decimal: ")
+	i=0
+	for ((x=$numDec;x>=1;x=numDiv)); do
+		numDiv=`expr $x / 2`
+		numRes[$i]=$(echo "$x % 2" | bc)
+		i=$((i+1))
+	done
+	# Ordenar binario
+	i=0
+	for ((x=${#numRes[*]};x>=0;x--)); do
+		binarios[$i]=${numRes[$x]}
+		i=$((i+1))
+	done
+	
+	zenity --info --title="Decimal a binario" --text="${binarios[*]}"
+}
+
+function BinDec(){
+	numBin=$(zenity --entry --title="Binario a decimal" --text="Escribe un número binario: ")
+	i=0
+	sum=0
+	for ((x=${#numBin};x>0;x--)); do
+		pos=$(expr substr $numBin $x 1)
+		if [ $pos = 1 ]; then
+			sum=$((sum+$(expr 2^$i | bc)))
+		else
+			sum=$((sum+0))
+		fi
+		i=$((i+1))
+	done
+	
+	zenity --info --title="Binario a decimal" --text="$sum"
+}
+
+function OctaDec(){
+
+	numOcta=$(zenity --entry --title="Octal a decimal" --text="Escribe un número en octal: ")
+	i=0
+	sum=0
+	for ((x=${#numOcta};x>0;x--)); do
+		pos=$(expr substr $numOcta $x 1)
+		if [ $pos -gt 7 ]; then
+			x=-1
+		else
+			sum=$((sum+$(expr $pos*8^$i | bc)))
+		fi
+		i=$((i+1))
+	done
+
+	if [ $x -le -1 ]; then
+		zenity --warning --title="Octal a decimal" --text="No existen números mayores a 7 en el sistema octal"
+	else
+		zenity --info --title="Octal a decimal" --text="$sum"
+	fi
+
+}
+
+function HexaDec(){
+
+	numHexa=$(zenity --entry --title="Hexadecimal a decimal" --text="Escribe un número hexadecimal: ")
+	i=0
+	sum=0
+	for ((x=${#numHexa};x>0;x--)); do
+		pos=$(expr substr $numHexa $x 1)
+		if [ $pos = "A" ]; then
+			pos=10
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos = "B" ]; then
+			pos=11
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos = "C" ]; then
+			pos=12
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos = "D" ]; then
+			pos=13
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos = "E" ]; then
+			pos=14
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos = "F" ]; then
+			pos=15
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		elif [ $pos -ge 0 -o $pos -le 9 ]; then
+			sum=$((sum+$(expr $pos*16^$i | bc)))
+		else
+			x=-1
+		fi
+		i=$((i+1))
+	done
+
+	if [ $x -le -1 ]; then
+		zenity --warning --title="Hexadecimal a decimal" --text="Uno de los caracteres no existe en el sistema hexadecimal"
+	else
+		zenity --info --title="Hexadecimal a decimal" --text="$sum"
+	fi
+
+}
+
+function HexaBin(){
+
+	numHexa=$(zenity --entry --title="Hexadecimal a binario" --text="Escribe un número hexadecimal: ")
+	i=0
+	sum=""
+	cant=${#numHexa}
+	
+	for ((x=1;x <= $cant;x++)); do
+		pos=$(expr substr $numHexa $x 1)
+		if [ $pos = "A" ]; then
+			pos="1010"
+			sum=$sum$pos
+		elif [ $pos = "B" ]; then
+			pos="1011"
+			sum=$sum$pos
+		elif [ $pos = "C" ]; then
+			pos="1100"
+			sum=$sum$pos
+		elif [ $pos = "D" ]; then
+			pos="1101"
+			sum=$sum$pos
+		elif [ $pos = "E" ]; then
+			pos="1110"
+			sum=$sum$pos
+		elif [ $pos = "F" ]; then
+			pos="1111"
+			sum=$sum$pos
+		elif [ $pos -eq 9 ]; then
+			pos="1001"
+			sum=$sum$pos
+		elif [ $pos -eq 8 ]; then
+			pos="1000"
+			sum=$sum$pos
+		elif [ $pos -eq 7 ]; then
+			pos="0111"
+			sum=$sum$pos
+		elif [ $pos -eq 6 ]; then
+			pos="0110"
+			sum=$sum$pos
+		elif [ $pos -eq 5 ]; then
+			pos="0101"
+			sum=$sum$pos
+		elif [ $pos -eq 4 ]; then
+			pos="0100"
+			sum=$sum$pos
+		elif [ $pos -eq 3 ]; then
+			pos="0011"
+			sum=$sum$pos
+		elif [ $pos -eq 2 ]; then
+			pos="0010"
+			sum=$sum$pos
+		elif [ $pos -eq 1 ]; then
+			pos="0001"
+			sum=$sum$pos
+		elif [ $pos -eq 0 ]; then
+			pos="0000"
+			sum=$sum$pos
+		else
+			x=1000
+		fi
+	done
+
+	if [ $x -ge 1000 ]; then
+		zenity --warning --title="Hexadecimal a decimal" --text="Uno de los caracteres no existe en el sistema hexadecimal"
+	else
+		zenity --info --title="Hexadecimal a decimal" --text="$sum"
+	fi
+
+}
+
+x=1
+while [ $x != 6 ]; do
+	Menu
+	x=$?
+	case $x in
+		1) DecBin;;
+		2) BinDec;;
+		3) OctaDec;;
+		4) HexaDec;;
+		5) HexaBin;;
+		6) x=6;;
+		*) zenity --error --text="No existe esa opción"
+	esac
+done
+
+
